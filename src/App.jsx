@@ -2,6 +2,7 @@ import MovieCard from "./components/MovieCard";
 import Search from "./components/search";
 import Spinner from "./components/Spinner";
 import { useEffect, useState } from "react";
+import { useDebounce } from "react-use";
 
 const API_BASE_URL = "https://api.themoviedb.org/3";
 const API_KEY = import.meta.env.VITE_TMDB_API_KEY;
@@ -11,12 +12,15 @@ const App = () => {
   const [errorMessage, setErrorMessage] = useState("");
   const [movieList, setMovieList] = useState([]);
   const [isLoading, setIsLoading] = useState(false);
+  const [debouncedQuery, setDebouncedQuery] = useState("");
 
-  const fetchMovies = async () => {
+  const fetchMovies = async (query) => {
     setIsLoading(true);
     setErrorMessage("");
     try {
-      const endpoint = `${API_BASE_URL}/discover/movie?sort_by=popularity.desc`;
+      const endpoint = query
+        ? `${API_BASE_URL}/search/movie?query=${encodeURI(query.trim())}`
+        : `${API_BASE_URL}/discover/movie?sort_by=popularity.desc`;
 
       const response = await fetch(endpoint, {
         method: "GET",
@@ -44,9 +48,11 @@ const App = () => {
       setIsLoading(false);
     }
   };
+  useDebounce(() => setDebouncedQuery(searchTerm), 500, [searchTerm]);
   useEffect(() => {
-    fetchMovies();
-  }, []);
+    fetchMovies(debouncedQuery);
+  }, [debouncedQuery]);
+
   return (
     <main>
       <div className="pattern"></div>
