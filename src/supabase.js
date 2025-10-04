@@ -7,7 +7,7 @@ const VITE_SUPABASE_KEY = import.meta.env.VITE_SUPABASE_KEY;
 
 const supabase = createClient(VITE_SUPABASE_URL, VITE_SUPABASE_KEY);
 console.log(supabase);
-const updateMovieCount = async (searchTerm, movie) => {
+export const updateMovieCount = async (searchTerm, movie) => {
   try {
     //perform search call
     const { data, error } = await supabase
@@ -50,4 +50,16 @@ const updateMovieCount = async (searchTerm, movie) => {
   }
 };
 
-export default updateMovieCount;
+export const getTrendingMovies = async () => {
+  try {
+    const data = await supabase
+      .from("Metrics")
+      .select()
+      .order("count", { ascending: false })
+      .limit(5);
+    console.log("Trending data", data);
+    return data;
+  } catch (error) {
+    console.log(error);
+  }
+};
